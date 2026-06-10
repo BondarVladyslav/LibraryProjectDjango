@@ -31,6 +31,10 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'authorization/profile.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['favourite_books'] = self.request.user.additional_data.favourite_books.all()
+        context['finished_books'] = self.request.user.additional_data.finished_books.all()
+        context['bio'] = self.request.user.additional_data.bio
+        context['username'] = self.request.user.username
         return context
 
 class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
