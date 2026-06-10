@@ -42,19 +42,28 @@ class OneBook(BaseMixin,DetailView):
         context = super().get_context_data(**kwargs)
         return self.get_mixin_context(context)
     def post(self, request, *args, **kwargs):
-        added_to_favourite = UserProfile.objects.filter(user=request.user).first()
-        if not added_to_favourite:
-            added_to_favourite = UserProfile.objects.create(user = request.user)
-            print(added_to_favourite, 'created')
-        
-        if not added_to_favourite.favourite_books.filter(id=self.get_object().id).exists():
-            added_to_favourite.favourite_books.add(self.get_object())
+        person_profile = UserProfile.objects.filter(user=request.user).first() 
+        if request.POST.get('action') == 'toggle_favorite':
+            print('toggle_favorite')
+            if not person_profile.favourite_books.filter(id=self.get_object().id).exists():
+                person_profile.favourite_books.add(self.get_object())
 
-        else:
-            added_to_favourite.favourite_books.remove(self.get_object())
+            else:
+                person_profile.favourite_books.remove(self.get_object())
 
-        added_to_favourite.save()
+            person_profile.save()
+        elif request.POST.get('action') == 'toggle_finished_read':
+            print('toggle_finished_read')
+            if not person_profile.finished_books.filter(id=self.get_object().id).exists():
+                person_profile.finished_books.add(self.get_object())
+
+            else:
+                person_profile.finished_books.remove(self.get_object())
+
+            person_profile.save()
+
         return redirect('bookByID', book_id=self.get_object().id)
+        
 
      
 

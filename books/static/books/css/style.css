@@ -985,3 +985,54 @@ body, html {
 .author-read-btn:active {
     transform: scale(0.98);
 }
+
+
+/* Сброс стандартного оформления кнопки */
+.add-to-favorites-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;        /* убирает лишнее пространство вокруг картинки */
+}
+
+/* Размер иконки – подберите под ваш PNG (например, 36px) */
+.heart-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;   /* сохраняет пропорции, если PNG не квадратный */
+    display: block;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Лёгкий эффект при наведении */
+.add-to-favorites-btn:hover .heart-icon {
+    transform: scale(1.12);
+    opacity: 0.9;
+}
+
+/* Если нужно, можно добавить отступы вокруг кнопки, не трогая саму иконку */
+/*
+.add-to-favorites-btn {
+    margin-left: 10px;
+}
+*/
+
+.favorites-actions {
+    display: flex;
+    gap: 15px;          /* расстояние между кнопками */
+    align-items: center;
+    margin: 10px 0;
+}
+
+/* Если кнопки-формы имеют фиксированную ширину или высоту, можно убрать лишние отступы */
+.add-to-favorites-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}

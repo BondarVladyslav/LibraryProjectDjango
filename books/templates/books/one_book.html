@@ -26,7 +26,9 @@
                 <p class="book-detail-author">Автор: <span>{{ book.author }}</span></p>
             </a>
         {% endif %}
+        <div class="favorites-actions">
                 <form method = 'post'>
+                    <input type="hidden" name="action" value="toggle_favorite">
                     {% csrf_token %}
                     <button type = 'submit' class='add-to-favorites-btn'>
                         {% if user.is_authenticated and book in user.additional_data.favourite_books.all %}
@@ -35,7 +37,17 @@
                             <img src="{% static 'books/images/not_liked_book.png' %}" alt="Добавить в избранное" class="heart-icon" > 
                         {% endif %}</button>
                 </form>
-        
+                <form method = 'post'>
+                    <input type="hidden" name="action" value="toggle_finished_read">
+                    {% csrf_token %}
+                    <button type = 'submit' class='add-to-favorites-btn'>
+                        {% if user.is_authenticated and book in user.additional_data.finished_books.all %}
+                            <img src="{% static 'books/images/unfinish_book.png' %}" alt="Убрать из прочитанных" class="heart-icon">
+                        {% else %}
+                            <img src="{% static 'books/images/finish_book.png' %}" alt="Добавить в избранное" class="heart-icon" > 
+                        {% endif %}</button>
+                </form>
+        </div>
         <div class="book-detail-divider"></div>
         
         <div class="book-detail-description">
