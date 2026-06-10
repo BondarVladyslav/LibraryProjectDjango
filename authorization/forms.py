@@ -32,7 +32,7 @@ class RegisterForm(UserCreationForm):
         return email
     
 
-class UserProfile(forms.ModelForm):
+class UserProfileChangeData(forms.ModelForm):
     username = forms.CharField(disabled=True, widget=forms.TextInput())
     email = forms.CharField(disabled=True, widget=forms.TextInput())
     first_name = forms.CharField(label='Имя', widget=forms.TextInput())

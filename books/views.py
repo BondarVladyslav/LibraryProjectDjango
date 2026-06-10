@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Prefetch
 from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView
 from traitlets import List
+from authorization.models import UserProfile
 from books.models import Author, Book, Genre
 from .forms import AddBookForm, SearchBookForm
 from django.urls import reverse_lazy
@@ -40,22 +41,18 @@ class OneBook(BaseMixin,DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return self.get_mixin_context(context)
-    ''' def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
-        added_to_favourite = UserAdditionalData.objects.filter(user=request.user)
+        added_to_favourite = UserProfile.objects.filter(user=request.user)
         if not added_to_favourite.exists():
-            new_user_data = UserAdditionalData.objects.create()
-            new_user_data.user.add(request.user)
-       
-        if not added_to_favourite.exists():
-            added_to_favourite.user.add(request.user)
+            added_to_favourite = UserProfile.objects.create(user = request.user)
         
         if not added_to_favourite.favourite_books.filter(id=self.get_object().id).exists():
-            added_to_favourite.favourite_books.add(self.get_object()
+            added_to_favourite.favourite_books.add(self.get_object())
         
         
         added_to_favourite.save()
-        return redirect('bookByID', book_id=self.get_object().id))'''
+        return redirect('bookByID', book_id=self.get_object().id)
 
      
 
