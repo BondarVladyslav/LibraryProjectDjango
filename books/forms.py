@@ -3,7 +3,7 @@ from .models import Genre, Book, Author
 from django.core.validators import MaxLengthValidator 
 import datetime
 from django.core.exceptions import ValidationError
-from .models import Book
+from .models import Book, Comment
 
 
 class AddBookForm(forms.ModelForm):
@@ -53,3 +53,21 @@ class SearchBookForm(forms.Form):
     search = forms.CharField(max_length=100,
                              required=False
                              )
+    
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment  
+        fields = ['text']  
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'comment-textarea',
+                'placeholder': 'Напишите ваш комментарий...',
+                'rows': 4,
+                'maxlength': 1000, 
+            }),
+        }
+        labels = {
+            'text': '', 
+        }

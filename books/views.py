@@ -1,6 +1,6 @@
 from http.client import HTTPResponse
 from urllib import request
-
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
@@ -9,7 +9,7 @@ from django.views.generic import TemplateView, ListView, DetailView, FormView, C
 from traitlets import List
 from authorization.models import UserProfile
 from books.models import Author, Book, Genre
-from .forms import AddBookForm, SearchBookForm
+from .forms import AddBookForm, CommentForm, SearchBookForm
 from django.urls import reverse_lazy
 from .utils import BaseMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -43,6 +43,9 @@ class OneBook(BaseMixin,DetailView):
         if not self.get_object().is_published:
             raise Http404('Книга не найдена')
         context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+
+        context['comments'] = self.get_object().comments.all()
         return self.get_mixin_context(context)
     
     def post(self, request, *args, **kwargs):
@@ -67,7 +70,14 @@ class OneBook(BaseMixin,DetailView):
                 person_profile.finished_books.remove(self.get_object())
 
             person_profile.save()
-
+        elif request.POST.get('action') == 'add_comment':
+            print('add_comment')
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.book = self.get_object()
+                comment.user = request.user
+                comment.save()
         return redirect('bookByID', book_id=self.get_object().id)
         
 
@@ -198,4 +208,3 @@ def download_book(request, book_id):
         return Http404('File not found')
     
 
-    

@@ -54,10 +54,35 @@
             {{ book.description|safe }}
         </div>
         {% for genre in book.genre.all %}
-            <a href="{% url 'bookslist' %}?search={{ genre.genre_name }}" class="book-detail-genre-link">
+            <a href="{% url 'bookslist' %}?genre={{ genre.slug }}" class="book-detail-genre-link">
                 <span class="book-detail-genre">{{ genre }}</span>
             </a>
         {% endfor %}
+<form method="post" class="comment-form" novalidate>
+    {% csrf_token %}
+    
+    <div class="comment-field">
+        {{ comment_form.text }}
+        {% if comment_form.text.errors %}
+            <div class="error-message">{{ comment_form.text.errors }}</div>
+        {% endif %}
+        <input type="hidden" name="action" value="add_comment">
+    </div>
+    
+    <button type="submit" class="submit-comment-btn">Отправить</button>
+</form>
+<div class="comments-section">
+    <h3 class="comments-title">Комментарии <span class="comments-count">({{ comments|length }})</span></h3>
+    
+    {% for comment in comments %}
+        <div class="comment-card">
+            <div class="comment-author"><a href="{% url 'authorization:profile' pk=comment.user.id %}">{{ comment.user.username }}</a></div>
+            <p class="comment-text">{{ comment.text|linebreaksbr }}</p>
+        </div>
+    {% empty %}
+        <p class="empty-comments">Пока нет комментариев. Будьте первым!</p>
+    {% endfor %}
+</div>
     </main>
 
 </div>

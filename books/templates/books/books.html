@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
+{%load books_tags%}
 <div class="books-page">
     <div class="search-section">
         <form class="search-form" method="GET">
@@ -30,10 +32,20 @@
         {% endfor %}
     </div>
 
-    <div class="pagination">
-        {% for p in paginator.page_range %}
-        <a class="page-link" href="?page={{ p }}">{{ p }}</a>
-        {% endfor %}
-    </div>
+<div class="pagination">
+    {% for p in paginator.page_range %}
+        {% with min_page=page_obj.number|add:-2 max_page=page_obj.number|add:2 %}
+        {% if p < max_page and p > min_page %}
+
+        <a class="page-link" href="{% remove_param 'page' %}&page={{ p }}">{{ p }}</a>
+        {% elif p == max_page %}
+        <a class="page-link" href="{% remove_param 'page' %}&page={{ p }}">&gt</a>
+        {% elif p == min_page %}
+        <a class="page-link" href="{% remove_param 'page' %}&page={{ p }}">&lt</a>
+
+        {% endif %}
+        {% endwith %}
+    {% endfor %}
+</div>
 </div>
 {% endblock %}
