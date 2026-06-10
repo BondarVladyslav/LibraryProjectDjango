@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="book-detail-container">
+    
+    <aside class="book-detail-sidebar">
+        <div class="book-detail-cover">
+            {% if book.book_avatar %}
+                <img src="{{ book.book_avatar.url }}" alt="{{ book.title }}">
+
+            {% else %}
+                <div class="no-avatar">Нет обложки</div>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'download_book' book.id %}" class="download-large-btn">
+            Скачать книгу
+        </a>
+    </aside>
+
+    <main class="book-detail-main">
+        <h1 class="book-detail-title">{{ book.title }}</h1>
+        
+        {% if book.author %}
+            <a href="{% url 'authorbyslug' author_slug=book.author.slug %}">
+                <p class="book-detail-author">Автор: <span>{{ book.author }}</span></p>
+            </a>
+        {% endif %}
+                <form method = 'post'>
+                    {% csrf_token %}
+                    <button type = 'submit' class='add-to-favorites-btn'>
+                        {% if user.is_authenticated and book in user.additional_data.favourite_books.all %}
+                            Убрать из избранного
+                        {% else %}
+                            Добавить в избранное
+                        {% endif %}</button>
+                </form>
+        
+        <div class="book-detail-divider"></div>
+        
+        <div class="book-detail-description">
+            {{ book.description|safe }}
+        </div>
+        {% for genre in book.genre.all %}
+            <a href="{% url 'bookslist' %}?search={{ genre.genre_name }}" class="book-detail-genre-link">
+                <span class="book-detail-genre">{{ genre }}</span>
+            </a>
+        {% endfor %}
+    </main>
+
+</div>
+{% endblock %}

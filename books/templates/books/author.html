@@ -1,0 +1,14 @@
+{%extends 'base.html' %}
+{%block content%}
+    <div>
+        {{author.name}}
+    </div>
+    {% for b in books %}
+        <h2>{{ b.title }}</h2>
+        {% for gen in b.genre.all %}
+            <a href="{% url 'bookslist' %}?genre={{ gen.slug }}">
+                <b>{{ gen }} | {{ gen.books_count }} |</b>
+            </a>
+        {% endfor %}
+    {% endfor %}
+{%endblock%}

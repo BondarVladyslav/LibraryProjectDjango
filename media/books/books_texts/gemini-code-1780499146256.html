@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Ghost Hunter</title>
+    <style>
+        /* --- БАЗОВЫЕ НАСТРОЙКИ И ТЕМА --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0d1117;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- ИГРОВОЕ ПОЛЕ --- */
+        .game-container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(circle, #1c2333 0%, #090d16 100%);
+            border: 4px solid #388bfd;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(56, 139, 253, 0.3);
+            overflow: hidden;
+            /* Инициализируем CSS-счетчик очков */
+            counter-reset: score; 
+        }
+
+        /* --- ИНТЕРФЕЙС И СЧЁТЧИК --- */
+        .ui-panel {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .score-board {
+            font-size: 24px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        /* Выводим значение CSS-счетчика на экран */
+        .score-board::after {
+            content: " " counter(score);
+            color: #ff7b72;
+        }
+
+        /* --- ТАЙМЕР --- */
+        .timer-bar {
+            width: 200px;
+            height: 14px;
+            background: #21262d;
+            border-radius: 7px;
+            border: 2px solid #30363d;
+            overflow: hidden;
+        }
+
+        .timer-progress {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #56ab2f, #a8ff78);
+            /* Анимация таймера на 15 секунд */
+            animation: countdown 15s linear forwards;
+        }
+
+        @keyframes countdown {
+            from { width: 100%; background: #34d058; }
+            50% { background: #e3b341; }
+            to { width: 0%; background: #f85149; }
+        }
+
+        /* --- ЛОГИКА ИГРЫ (ЧЕКБОКСЫ) --- */
+        /* Прячем дефолтные чекбоксы с экрана */
+        input[type="checkbox"] {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        /* Если чекбокс нажат — увеличиваем CSS-счетчик */
+        input[type="checkbox"]:checked {
+            counter-increment: score;
+        }
+
+        /* Если чекбокс нажат — исчезает связанный с ним призрак */
+        input[type="checkbox"]:checked + .ghost {
+            display: none !important;
+        }
+
+        /* --- ПРИЗРАКИ (МИШЕНИ) --- */
+        .ghost {
+            position: absolute;
+            font-size: 45px;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.1s;
+            animation-duration: 4s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+            opacity: 0;
+        }
+
+        .ghost:hover {
+            transform: scale(1.2);
+        }
+
+        /* Кастомный эмодзи для каждого призрака */
+        .ghost::before {
+            content: "👻";
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.6));
+        }
+
+        /* Траектории и задержки для создания хаоса */
+        .g1 { animation-name: fly-1; animation-delay: 0s; }
+        .g2 { animation-name: fly-2; animation-delay: 1s; }
+        .g3 { animation-name: fly-3; animation-delay: 2s; }
+        .g4 { animation-name: fly-4; animation-delay: 0.5s; }
+        .g5 { animation-name: fly-5; animation-delay: 1.5s; }
+        .g6 { animation-name: fly-6; animation-delay: 2.5s; }
+
+        /* --- АНИМАЦИИ ПОЛЕТА --- */
+        @keyframes fly-1 {
+            0%, 100% { top: 20%; left: 10%; opacity: 0; }
+            10%, 90% { opacity: 1; }
+            50% { top: 70%; left: 40%; }
+        }
+        @keyframes fly-2 {
+            0%, 100% { top: 70%; left: 80%; opacity: 0; }
+            15%, 85% { opacity: 1; }
+            50% { top: 20%; left: 50%; }
+        }
+        @keyframes fly-3 {
+            0%, 100% { top: 40%; left: 40%; opacity: 0; }
+            20%, 80% { opacity: 1; transform: rotate(15deg); }
+            50% { top: 80%; left: 15%; transform: rotate(-15deg); }
+        }
+        @keyframes fly-4 {
+            0%, 100% { top: 80%; left: 70%; opacity: 0; }
+            10%, 90% { opacity: 1; }
+            40% { top: 30%; left: 20%; }
+        }
+        @keyframes fly-5 {
+            0%, 100% { top: 15%; left: 75%; opacity: 0; }
+            25%, 75% { opacity: 1; }
+            60% { top: 65%; left: 30%; }
+        }
+        @keyframes fly-6 {
+            0%, 100% { top: 50%; left: 50%; opacity: 0; }
+            10%, 90% { opacity: 1; }
+            70% { top: 10%; left: 85%; }
+        }
+
+        /* --- ЭКРАН GAME OVER --- */
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            
+            /* Магия времени: экран появляется ровно через 15 секунд */
+            opacity: 0;
+            pointer-events: none;
+            animation: showGameOver 0s forwards;
+            animation-delay: 15s;
+        }
+
+        @keyframes showGameOver {
+            to { opacity: 1; pointer-events: auto; }
+        }
+
+        .game-over h1 {
+            font-size: 48px;
+            color: #f85149;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(248, 81, 73, 0.5);
+        }
+
+        .final-score {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .final-score::after {
+            content: " " counter(score) " / 6";
+            color: #58a6ff;
+            font-weight: bold;
+        }
+
+        /* Перезапуск игры без JS через обычную ссылку, которая обнуляет состояние */
+        .restart-btn {
+            padding: 12px 24px;
+            background: #238636;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .restart-btn:hover {
+            background: #2ea043;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="ui-panel">
+            <div class="score-board">Очки:</div>
+            <div class="timer-bar">
+                <div class="timer-progress"></div>
+            </div>
+        </div>
+
+        <input type="checkbox" id="ghost1"><label for="ghost1" class="ghost g1"></label>
+        <input type="checkbox" id="ghost2"><label for="ghost2" class="ghost g2"></label>
+        <input type="checkbox" id="ghost3"><label for="ghost3" class="ghost g3"></label>
+        <input type="checkbox" id="ghost4"><label for="ghost4" class="ghost g4"></label>
+        <input type="checkbox" id="ghost5"><label for="ghost5" class="ghost g5"></label>
+        <input type="checkbox" id="ghost6"><label for="ghost6" class="ghost g6"></label>
+
+        <div class="game-over">
+            <h1>Время истекло!</h1>
+            <div class="final-score">Твой результат:</div>
+            <a href="" class="restart-btn">Играть снова</a>
+        </div>
+    </div>
+
+</body>
+</html>
