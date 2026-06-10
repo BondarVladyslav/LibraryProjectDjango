@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <div class="book-detail-container">
     
@@ -29,9 +30,9 @@
                     {% csrf_token %}
                     <button type = 'submit' class='add-to-favorites-btn'>
                         {% if user.is_authenticated and book in user.additional_data.favourite_books.all %}
-                            Убрать из избранного
+                            <img src="{% static 'books/images/liked_book.png' %}" alt="Убрать из избранного" class="heart-icon">
                         {% else %}
-                            Добавить в избранное
+                            <img src="{% static 'books/images/not_liked_book.png' %}" alt="Добавить в избранное" class="heart-icon" > 
                         {% endif %}</button>
                 </form>
         
