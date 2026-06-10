@@ -196,3 +196,6 @@ def download_book(request, book_id):
         
     except:
         return Http404('File not found')
+    
+
+    

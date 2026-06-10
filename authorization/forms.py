@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
+
+from authorization.models import UserProfile
 class LoginForm(AuthenticationForm):
     username =  forms.CharField(label='Логин', widget=forms.TextInput())
     password =  forms.CharField(label='Пароль', widget=forms.PasswordInput())
@@ -30,6 +32,15 @@ class RegisterForm(UserCreationForm):
         if get_user_model().objects.filter(email=email).exists():
             raise forms.ValidationError('Email занят')
         return email
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['first_name']
+        if commit:
+            user.save()
+            UserProfile.objects.create(user=user)
+
+        return user
     
 
 class UserProfileChangeData(forms.ModelForm):
