@@ -1,4 +1,5 @@
 from http.client import HTTPResponse
+from urllib import request
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseNotFound
@@ -39,9 +40,14 @@ class OneBook(BaseMixin,DetailView):
     model = Book
     pk_url_kwarg = 'book_id'
     def get_context_data(self, **kwargs):
+        if not self.get_object().is_published:
+            raise Http404('Книга не найдена')
         context = super().get_context_data(**kwargs)
         return self.get_mixin_context(context)
+    
     def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('authorization:login')
         person_profile = UserProfile.objects.filter(user=request.user).first() 
         if request.POST.get('action') == 'toggle_favorite':
             print('toggle_favorite')
@@ -73,7 +79,7 @@ class BooksList(BaseMixin,ListView):
     context_object_name = 'books'
     paginate_by = 9
     def get_queryset(self):
-        books = Book.objects.select_related('author').all()
+        books = Book.objects.select_related('author').filter(is_published=True)
         
         ordering = self.request.GET.get('sort')
 
@@ -121,9 +127,9 @@ def authorbyslug(request, author_slug):
 
     #Prefetch + annotate на ManyToMany не работают нормально
     genre_counts = dict(
-        Genre.objects.annotate(c=Count('book')).values_list('id', 'c')
+        Genre.objects.annotate(c=Count('book', filter=Q(book__is_published=True))).values_list('id', 'c')
     )
-    books = author.books.prefetch_related('genre')
+    books = author.books.prefetch_related('genre').filter(is_published=True)
     for book in books:
         for gen in book.genre.all():
             gen.books_count = genre_counts.get(gen.id, 0)
@@ -151,7 +157,7 @@ class Authors(BaseMixin,ListView):
     
     def get_queryset(self):
         return Author.objects.annotate(
-            books_count=Count('books')
+            books_count=Count('books', filter=Q(books__is_published=True))
         ).order_by('-books_count')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -177,10 +183,11 @@ class PostBook(LoginRequiredMixin, BaseMixin, CreateView):
     
 
 def download_book(request, book_id):
+
     book = get_object_or_404(Book, id=book_id)
-    print(book.bookFile)
+    if book.is_published == False:
+        return Http404('File not found')
     if not book.bookFile:
-        print('aaaa')
         return Http404('File not found')
     try:
         print(book.bookFile.path)

@@ -47,6 +47,7 @@ class Book(models.Model):
     bookFile = models.FileField(upload_to='books/books_texts')
     book_avatar = models.ImageField(upload_to='books/books_avatars')
     posted_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, related_name='posted_by', null=True, blank=True)
+    is_published = models.BooleanField(default=False)
     def __str__(self):
         return self.title
     
