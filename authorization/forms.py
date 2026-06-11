@@ -46,10 +46,10 @@ class RegisterForm(UserCreationForm):
 class UserProfileChangeData(forms.ModelForm):
     username = forms.CharField(disabled=True, widget=forms.TextInput())
     email = forms.CharField(disabled=True, widget=forms.TextInput())
-    first_name = forms.CharField(label='Имя', widget=forms.TextInput())
+    bio = forms.CharField(label='О себе', widget=forms.TextInput())
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email','first_name']
+        fields = ['username', 'email', 'bio']
 
 
 class ChangePasswordForm(PasswordChangeForm):

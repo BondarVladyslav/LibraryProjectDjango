@@ -5,6 +5,8 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+
+from authorization.models import UserProfile
 from .forms import ChangePasswordForm, LoginForm, RegisterForm, UserProfileChangeData
 
 class LoginUser(LoginView):
@@ -26,7 +28,20 @@ class UserChangeDataView(LoginRequiredMixin,UpdateView):
     
     def get_object(self, queryset=None):
         return self.request.user
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        bio = form.cleaned_data.get('bio')
+        if bio is not None:
+            profile = UserProfile.objects.get(user=self.object)
+            profile.bio = bio
+            profile.save()
+        return response
     
+    def get_initial(self):
+        initial = super().get_initial()
+        profile = UserProfile.objects.get(user=self.request.user)
+        initial['bio'] = profile.bio
+        return initial
 
 class UserProfileView(TemplateView):
     template_name = 'authorization/profile.html'
@@ -40,13 +55,16 @@ class UserProfileView(TemplateView):
 
         else:
             user = self.request.user
+            print(user.username)
             if not user.is_authenticated:
                 return redirect('authorization:login')
         context['favourite_books'] = user.additional_data.favourite_books.all()
         context['finished_books'] = user.additional_data.finished_books.all()
         context['bio'] = user.additional_data.bio
         context['username'] = user.username
+        context['profile_pk'] = user.pk
         return context
+
 
 class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'authorization/change_password.html'

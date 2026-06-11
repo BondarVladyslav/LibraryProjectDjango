@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Prefetch
-from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView
 from traitlets import List
 from authorization.models import UserProfile
 from books.models import Author, Book, Genre
@@ -40,7 +40,7 @@ class OneBook(BaseMixin,DetailView):
     model = Book
     pk_url_kwarg = 'book_id'
     def get_context_data(self, **kwargs):
-        if not self.get_object().is_published and not self.request.user.is_superuser:
+        if not self.get_object().is_published and not self.request.user.has_perm('Book.can_moderate_books'):
             raise Http404('Книга не найдена')
         context = super().get_context_data(**kwargs)
         context['comment_form'] = CommentForm()
@@ -114,6 +114,7 @@ class BooksList(BaseMixin,ListView):
             books = books.filter(genre__slug__in=genres.split('.'))
         
         form = SearchBookForm(self.request.GET or None)
+        
         if form.is_valid():
             search = form.cleaned_data['search']
             if search:
