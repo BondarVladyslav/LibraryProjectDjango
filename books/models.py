@@ -54,7 +54,9 @@ class Book(models.Model):
     class Meta:
         verbose_name = 'Книга'
         verbose_name_plural = 'Книги'
-    
+        permissions = [
+            ("can_moderate_books", "Can post and delete book"),
+        ]
 
 
 class Genre(models.Model):

@@ -11,6 +11,7 @@ urlpatterns = [
     path('authors/', views.Authors.as_view(), name='authors'),
     path('post/', views.PostBook.as_view(), name = 'post_book'),
     path('download/<int:book_id>/', views.download_book, name='download_book'),
+    path('moderate/', views.ModerateBooks.as_view(), name = 'moderate')
 ]
 
 if settings.DEBUG:

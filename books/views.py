@@ -12,7 +12,7 @@ from books.models import Author, Book, Genre
 from .forms import AddBookForm, CommentForm, SearchBookForm
 from django.urls import reverse_lazy
 from .utils import BaseMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 
 SiteName = 'Book4Read'
@@ -40,7 +40,7 @@ class OneBook(BaseMixin,DetailView):
     model = Book
     pk_url_kwarg = 'book_id'
     def get_context_data(self, **kwargs):
-        if not self.get_object().is_published:
+        if not self.get_object().is_published and not self.request.user.is_superuser:
             raise Http404('Книга не найдена')
         context = super().get_context_data(**kwargs)
         context['comment_form'] = CommentForm()
@@ -195,7 +195,7 @@ class PostBook(LoginRequiredMixin, BaseMixin, CreateView):
 def download_book(request, book_id):
 
     book = get_object_or_404(Book, id=book_id)
-    if book.is_published == False:
+    if not book.is_published and not request.user.is_superuser :
         return Http404('File not found')
     if not book.bookFile:
         return Http404('File not found')
@@ -208,3 +208,24 @@ def download_book(request, book_id):
         return Http404('File not found')
     
 
+class ModerateBooks(PermissionRequiredMixin, ListView):
+    model = Book
+    template_name = 'books/moderate_book.html'
+    context_object_name = 'books'
+    paginate_by = 5
+    permission_required = 'Book.can_moderate_books'
+    def get_queryset(self):
+        books = Book.objects.filter(is_published = False)
+        return books
+    def post(self, request, *args, **kwargs):
+        book_id = request.POST.get('book_id')
+        changed_publicating = Book.objects.get(pk=book_id)
+        if request.POST.get('action') == 'publicate':
+            changed_publicating.is_published = True
+            changed_publicating.save()
+        elif request.POST.get('action') == 'delete':
+            changed_publicating.delete()
+        return redirect('moderate')
+
+            
+    
